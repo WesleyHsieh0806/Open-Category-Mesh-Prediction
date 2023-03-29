@@ -5,6 +5,7 @@ Use the [provided script](../download_objaverse.py) to download [objaverse](http
     cd /Root/of/the/repository
     python download_objaverse.py --root [/path/to/objaverse/root]
 ```
+In the process, the annotation and .glb files will be cached in $root/.objaverse, you could modify the BASE_PATH [here](./objaverse/__init__.py) to change the cached directory to wherever you want.
 
 With the script, all objects with assigned LVIS categories will be downloaded into the root, structured as follows:
 
