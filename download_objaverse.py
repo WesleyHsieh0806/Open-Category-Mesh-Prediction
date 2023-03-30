@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # record all the uids of objects without images
     print("Fail to download images of {} objects. Save their uids to {}...".format(len(failed_uid), 
             os.path.join(args.root, "uid_wo_image.json")))
-    with open(os.path.join(args.root, "uid_wo_image.json")) as f:
+    with open(os.path.join(args.root, "uid_wo_image.json"), 'w') as f:
         json.dump(failed_uid, f)
     print("Done!")
     processes = multiprocessing.cpu_count()
