@@ -73,14 +73,13 @@ if __name__ == "__main__":
     '''
     print("Downloading {} images...".format(len(annotations)))
     failed_uid = []
-    for uid, ann in tqdm(annotations.items()):
+    for i, (uid, ann) in tqdm(enumerate(annotations.items())):
         url = get_image_url(ann)
         save_path = object_to_save_path(uid, ann, args, url, "image")
         
         # create repository
         if not os.path.isdir(os.path.dirname(save_path)):
             os.makedirs(os.path.dirname(save_path))
-
         # wget download
         cmd = "wget -q {} -O \"{}\"".format(url, save_path)
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
     for uid, tmp_path in tqdm(objects.items()):
         # move cached .glb to specifed output dir
         save_path = object_to_save_path(uid, annotations[uid], args, tmp_path, "3Dobject")
-        cmd = "mv {} {}".format(tmp_path, save_path)
+        cmd = "mv \"{}\" \"{}\"".format(tmp_path, save_path)
         if os.system(cmd):
             break
     print("Done!")
