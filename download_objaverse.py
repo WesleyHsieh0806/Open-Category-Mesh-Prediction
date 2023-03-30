@@ -72,6 +72,7 @@ if __name__ == "__main__":
     * Download images for each object
     '''
     print("Downloading {} images...".format(len(annotations)))
+    failed_uid = []
     for uid, ann in tqdm(annotations.items()):
         url = get_image_url(ann)
         save_path = object_to_save_path(uid, ann, args, url, "image")
@@ -82,8 +83,19 @@ if __name__ == "__main__":
 
         # wget download
         cmd = "wget -q {} -O \"{}\"".format(url, save_path)
+
         if os.system(cmd):
-            break
+            # the download fails
+            print("Unable to download {}".format(url))
+            failed_uid.append(uid)
+
+    print("Done!")
+
+    # record all the uids of objects without images
+    print("Fail to download images of {} objects. Save their uids to {}...".format(len(failed_uid), 
+            os.path.join(args.root, "uid_wo_image.json")))
+    with open(os.path.join(args.root, "uid_wo_image.json")) as f:
+        json.dump(failed_uid, f)
     print("Done!")
     processes = multiprocessing.cpu_count()
 
