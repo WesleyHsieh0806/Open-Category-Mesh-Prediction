@@ -1,0 +1,162 @@
+{
+    "wolf": [
+        "84ef153d7c8e4841946a0e626274a24e",
+        "b2f538bcd6a44b67909f07cb8d0606f5",
+        "7298c99444704c3da07851bb28a8cf51",
+        "5d0a63c2e123406b8a88a854745d7768",
+        "a6169c80ebbb42888745f73db2aac421",
+        "7da4293f47504141b6941b4721edea17",
+        "1bea7def2bc54432a983dccbd0a72d7c",
+        "ef31bb08e2ab40c68c00a38206d9044c",
+        "b1cc93ae04d74cddbea477a27e190fb1",
+        "3af6d9d8a5e648939298a9c8cdbc0bc4"
+    ],
+    "dress_hat": [
+        "f69ef12bb68b4fa382f5680fe039656f",
+        "143285e1f12540ddb29394a69100cd8d",
+        "73e2c657dd4248788c812fa838a1b7b8",
+        "f4ab0103956b4e9787ebaece0fe574b5",
+        "3d66ee325dfa450d942e864b554d877d",
+        "feca271009ca42f3b5572cdf48d030db"
+    ],
+    "lightbulb": [
+        "871ed12da7484c86b4d59a306813b1f9",
+        "42ac3d271a3a47da829a86239227560f",
+        "148ab4d6978a4a76ab5e291e07d8b999",
+        "e45b4406e2094c9c850fe40407a4ca02",
+        "ffb96ec22d27472d9a89b620fe2f4282",
+        "fc7dcd48bbce43c2b0b458a7beaec12d",
+        "7458b901eb0f40a0ab4065b12140a1ff",
+        "abab549e6aa846209e8411cd1e135739"
+    ],
+    "ring": [
+        "c33634017b1d40b48c07e312b6762bfd",
+        "65586b5f86b5481abb692b94ee709112",
+        "a88c7801b1c14802bb71d3c9b34014b6",
+        "b5634d0df70742bbb1cf2eb2eca00133",
+        "e6d2cc4b176a42d89c35f25a5db4784a",
+        "40c698c102e7405a91745d2f907c8a81",
+        "0fe6037175b94d25ae0b8068b0cdf854",
+        "4d8187534458455f99fa4d9b327aacd2",
+        "6cd0f9c4e8f34b5ca55a7eb7b1b8ab7e",
+        "c808b6c4239c4bb7becb3124c4b3543c",
+        "d04da8a35ae0491a93c77e806dd60abb",
+        "2fe397dc515f4f27b3007891d0799f0b"
+    ],
+    "globe": [
+        "9726552195bf4ccd93c181eecd9fbc9f",
+        "f54e5c6df5414ce48ed5eeca0ec9496f",
+        "08157e22487e4cf6a319b6023e766a3d",
+        "0b18c7293b3341cf8f077120b880cc95",
+        "4bbfe00d36d647608e12081fc47879b8",
+        "923472983df8487790ef5a90d467cfd7",
+        "f9dc30b767e74ffbaa8a5ea36d1f43bc",
+        "4ed1c284ae05448cb5131c20286301d9",
+        "86cdf9335a7c4b1d9c40ab294f46044d",
+        "a89e6f5e85fd485abe64f9b26eb14a57",
+        "17592eb4c67e48d3a13b36436b5b747f"
+    ],
+    "table_lamp": [
+        "5e31198bc72143599d4272f7598c0539",
+        "8b4d8353561c4e2bae4871a98d2c29b7",
+        "2fd7954d31dc47d7a48f9e0cb8faeeba",
+        "c1fea49ff58f41458b2339c708c8617d",
+        "c24148fe726a492b8eb37c2b6c303fed",
+        "5b28f20b21a34b33af9fa9cc193015e5",
+        "dbefa974912b463491dcaaa247d74e58",
+        "e283656b021f4032bb02f8eea06391e0"
+    ],
+    "gargoyle": [
+        "851c6e5f7e09492081ffdf4fbe8db63c",
+        "dfc72d663abc417488ecc2239b43c4dd",
+        "c981106da536417bbf2248a80cd2e9c6",
+        "2581387ab6454f1787e50d5909b325aa",
+        "9baa161056964895aa72011fc528c406",
+        "6c2b3f8e6d574361b7121968f9ed0b73",
+        "62eb766517024004865f3e80699815ac"
+    ],
+    "bookcase": [
+        "712dfa3d9bb24d55bf5daa02929473db",
+        "210cbdfe3b254964816edef01755ad7e",
+        "9fbfde79f5154d28a921b2d8a51b45d5",
+        "eb4a9828d3084b34bfc4275c9176c176",
+        "d48a42e91c5d4716a8c254addf8c9d99",
+        "1417a4fccb9d4a728105b3a3a45f6bb1",
+        "d3c01db2df584a95912a2e4f9d49d128",
+        "ecf7e409454d450cbde731259a51bbd5",
+        "08d73e1168504bf2b8706cd838ad16ef",
+        "2acda3ed2f9046129897f0f1e36092bd"
+    ],
+    "bus_vehicle": [
+        "7a9f2eea6069460793f5d3aedcb28663",
+        "2e11ed69dd064236aca7e18412ab89db",
+        "1d32015c67f8404e8f0d92ddbebf9574",
+        "ce47daaa1af84cd8b99b11d77e78905f",
+        "1e85bf94b50c4b62b777eeb38b24636d",
+        "9f9055b7bd2349b899f7dd87d5a1922d",
+        "9a179f9803734a3e95630727b9db3477"
+    ],
+    "fighter_jet": [
+        "1f057fac38694375b83d7d66c4f5ca4c",
+        "c6c14296f99d4c0cb482d5f544704815",
+        "87b43edb22bd4575beb28f7cfcbc3eff",
+        "8d4a801d78084e2ca1a95504a843e606",
+        "e1469973864543dfa85d177c160df348",
+        "42bf014476684e8ea2141ff373bd240a",
+        "f9f5bde162454b5e8c3190e2a386b4ee",
+        "70552a40bb664c23bbcca9def8da10d9",
+        "5c43ea2005c0476f93f30d73dec3e8a1",
+        "947b2924fc5b41158f25d4486fb30902",
+        "5c21cdb1255a4c0b8a5ba65d18447b9d"
+    ],
+    "desk": [
+        "23fa151346304c8bb8c58f58a76e6407",
+        "aa39a8cc7be04b0c8e02c6142a007137",
+        "e17af92232fd4c81828c56c2cc0a06cf",
+        "b930438e1f804c409fd9c3f5e4b01628",
+        "aede8475ffc7456db913f0c340696453",
+        "c67f61fa444044bcb88ec3e28f0ca7ac",
+        "1e387afc6d7443878c310756400dd467"
+    ],
+    "penguin": [
+        "4cffbf74c70a46ec9d63f33552319215",
+        "dd63e942710649deb5ab5ea45b11f9e2",
+        "f9d2ce65f26a4892a4888ffd495a54a9",
+        "cdeb8f7db547405580944edcbd516f27",
+        "874326a374c94980a7c7a6fba918dce7",
+        "b11f5e775bbe451b95744060859ae5a4",
+        "8a58020139cf43bc821bfdfa01e13208",
+        "75bf49a757fe44f28a0ec980747d5f97",
+        "868171898ce84e198802e21b0c6700e0"
+    ],
+    "chinaware": [
+        "950534bbb0f74e8792b41efd176c9c67",
+        "cbb67bbbe42e42189931574ce0d4926d",
+        "720803dc59a54590be644537b462befa",
+        "901718e881cf4a11a61cf2f810e666d5",
+        "b924ce155c374de198f199a2f75d6718",
+        "0d9fb15eb0dd4de3937d7273888d9e06"
+    ],
+    "lamppost": [
+        "7548a8a72b5e4f788151618ebd441c70",
+        "ad8a93bbc2a946bb87de2575036a6a69",
+        "8678f1a3b5214d50a59a42df060f1ce1",
+        "5e449a73f9214903bbc77b03fc423b62",
+        "714031af7a4e4f92ab2b463f4180ee5c",
+        "64db60298c1841aba59e23237d61da33",
+        "0f51b550f7e741d191657f7b39ef2175",
+        "ad49496e5f5443e38665049c8b0b4ea7",
+        "a5d5ac79157243fbb012de0f9ed62b8f",
+        "19030d0084cf49029a5759ff5597cce2",
+        "4218a29e816046bbb0bd6a9f468ab968"
+    ],
+    "basketball": [
+        "943a9bc962974d02aa34592084687c3c",
+        "8ac3640fb8e348a4b468527964a05e78",
+        "f08dada8b253466daff7bfd6445c9e41",
+        "b6bfe1c7bb3b4fd691f24914e430a2b2",
+        "f408ef68c38444ddb9dd2d3ba45e5227",
+        "e9d34a3af3c54910918b3221f9f770e4",
+        "1e7d0d1fce524233aa01b5b5d879a6a1"
+    ]
+}
