@@ -9,8 +9,8 @@ from omegaconf import DictConfig, OmegaConf
 import hydra
 
 
-from backbone import get_backbone
-from roi_head import get_roi_head
+from .backbone import get_backbone
+from .roi_head import get_roi_head
 # from detectron2.config import configurable
 # from detectron2.data.detection_utils import convert_image_to_rgb
 # from detectron2.layers import move_device_like

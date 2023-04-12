@@ -1,9 +1,5 @@
 from torch import nn
 from typing import List
-class MeshHead(nn.Module):
-    def __init__(self):
-        pass
-
 
 from collections import OrderedDict
 import fvcore.nn.weight_init as weight_init

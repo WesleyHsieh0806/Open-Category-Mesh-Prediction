@@ -9,18 +9,16 @@ from pytorch3d.structures import Meshes
 from pytorch3d.utils import ico_sphere
 from torch import nn
 
-from .mesh_head import (
+from models.roi_head.mesh_head import (
     build_mesh_head,
 #     mesh_rcnn_inference,
 #     mesh_rcnn_loss,
 )
-from .voxel_head import (
+from models.roi_head.voxel_head import (
     build_voxel_head,
     # voxel_rcnn_inference,
     # voxel_rcnn_loss,
 )
-# from meshrcnn.modeling.roi_heads.z_head import build_z_head, z_rcnn_inference, z_rcnn_loss
-# from meshrcnn.utils import vis as vis_utils
 
 
 class MeshRCNNROIHeads(nn.Module):
