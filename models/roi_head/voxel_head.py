@@ -23,11 +23,11 @@ class VoxelRCNNConvUpsampleHead(nn.Module):
 
         self.up_sample_conv = nn.Sequential(
                     nn.Conv2d(input_channels, conv_dims, kernel_size=(3, 3), stride=1, padding=1),
-                    nn.ReLU(),
+                    nn.ReLU(inplace=True),
                     nn.Conv2d(conv_dims, conv_dims, kernel_size=(3, 3), stride=1, padding=1),
-                    nn.ReLU(),
+                    nn.ReLU(inplace=True),
                     nn.ConvTranspose2d(conv_dims, conv_dims, kernel_size=(2, 2), stride=2),
-                    nn.ReLU(),
+                    nn.ReLU(inplace=True),
         )
 
         self.predictor = nn.Conv2d(conv_dims, self.num_depth, kernel_size=1, stride=1)

@@ -38,8 +38,8 @@ class ResGraphConv(nn.Module):
         * Output:
             tensor of shape (B*V, output_dim)
         '''
-        h1 = self.graph_conv1(F.relu(x), edge)
-        h2 = self.graph_conv2(F.relu(h1), edge)
+        h1 = self.graph_conv1(F.relu(x, inplace=True), edge)
+        h2 = self.graph_conv2(F.relu(h1, inplace=True), edge)
 
         skipped_x = x if (self.skip_proj is None) else self.skip_proj(x)
         return h2 + skipped_x
@@ -97,7 +97,7 @@ class MeshRefinementStage(nn.Module):
                                 vert_align(conv4_6, mesh, return_packed=True, padding_mode="border"),
                                 vert_align(conv5_3, mesh, return_packed=True, padding_mode="border")], dim=1)  # (B*V, 3840)
         # 3840 -> hidden_dim 
-        img_feats = F.relu(self.bottleneck(img_feats))
+        img_feats = F.relu(self.bottleneck(img_feats), inplace=True)
         if vert_feats is None:
             # hidden_dim + 3
             vert_feats = torch.cat((img_feats, mesh.verts_packed()), dim=1)  # (B*V, hidden_dim + 3)
