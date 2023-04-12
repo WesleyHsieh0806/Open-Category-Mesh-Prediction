@@ -1,9 +1,16 @@
 dataloader:
-  data_root: /path/to/Objaverse/Root
+  data_root: /mnt/data/objaverse
   num_worker: 8
-  split_data_path: /path/to/split/json
+  split_data_path: /home/ubuntu/Open-Category-Mesh-Prediction/dataset/train_seen_uid.json
   batch_size: 16
   train: True
+
+dataloader_test:
+  data_root: /mnt/data/objaverse
+  num_worker: 8
+  split_data_path: /home/ubuntu/Open-Category-Mesh-Prediction/dataset/test_seen_uid.json
+  batch_size: 16
+  train: False
 
 backbone:
   type: resnet50
@@ -37,3 +44,14 @@ roi_head:
     NORMALS_LOSS_WEIGHT: 0.0
     EDGE_LOSS_WEIGHT: 0.2
     GT_COORD_THRESH: 5.0
+
+training:
+  num_epochs: 10000
+  batch_size: 64
+  lr: 0.0005
+
+  checkpoint_path: ./checkpoints/baseline
+  checkpoint_interval: 1000
+  resume: True
+
+  device: "cuda"
