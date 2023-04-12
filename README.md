@@ -38,13 +38,22 @@ A Generalized Mesh Prediction Framework for Arbitrary Objects | CMU Learning for
 
 ## :running: Usage - Training
 ### Environment Setup
-- Python 3.8
-
+- Python 3.9
+- Pytorch==1.13.1 
+- torchvision==0.14.1
+- CUDA 11.6
 Use the provided [shell script](./environment_setup.sh) to setup the environment with only one command.
 ``` bash
 bash environment_setup.sh
 ```
 
+### Training
+``` bash
+python main.py \
+  --data_root [/path/to/Objaverse/Root] \
+  --split_data_path [/path/to/Objaverse/Split/Json] \
+  --train True
+```
 
 ## Citations
 ``` bash
