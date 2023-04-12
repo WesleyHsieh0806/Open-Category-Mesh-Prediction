@@ -22,3 +22,8 @@ conda install pytorch3d -c pytorch3d
 
 # install hydra to read configuration
 pip install hydra-core --upgrade
+
+
+# install open3d
+pip install open3d==0.17.0
+

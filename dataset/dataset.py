@@ -3,9 +3,13 @@ from torch.utils.data import Dataset, DataLoader
 
 
 import pytorch3d
-from pytorch3d.io import IO
-from pytorch3d.io.experimental_gltf_io import MeshGlbFormat
+from pytorch3d.structures import Meshes
+# from pytorch3d.io import IO
+# from pytorch3d.io.experimental_gltf_io import MeshGlbFormat
 
+
+from vox_utils import voxelize_xyz
+import open3d as o3d
 
 # Python 3.9
 # conda install pytorch==1.13.0 torchvision==0.14.0 pytorch-cuda=11.6 -c pytorch -c nvidia
@@ -32,9 +36,10 @@ IMAGE_STD = np.array([0.229, 0.224, 0.225])
 ORIGIN_IMAGE_SIZE  = (1080, 1920, 3)
 OUTPUT_IMAGE_SIZE = (144, 256, 3)
 
+VOXEL_SIZE = 48
 
-io = IO()
-io.register_meshes_format(MeshGlbFormat())
+# io = IO()
+# io.register_meshes_format(MeshGlbFormat())
 
 
 
@@ -51,6 +56,33 @@ def readImage(fn):
 def readGLBToMesh(fn):
     mesh = io.load_mesh(fn, include_textures=False, device="cpu")
     return mesh
+
+
+def readGLBToMeshAndVox(fn):
+    mesh = o3d.io.read_triangle_mesh(fn)
+    mesh.translate(-mesh.get_center())
+    mesh.scale(1.0 / np.max(mesh.get_max_bound() - mesh.get_min_bound()),
+            center=mesh.get_center())
+    
+    vertex = np.array(mesh.vertices)
+    faces = np.array(mesh.triangles)
+
+    vertex_ten = torch.Tensor(np.expand_dims(vertex, axis=0))
+    faces_ten = torch.Tensor(np.expand_dims(faces, axis=0))
+
+    meshes_ten = Meshes(vertex_ten, faces_ten)
+
+    voxel_grid = o3d.geometry.VoxelGrid.create_from_triangle_mesh(mesh, voxel_size=1./(VOXEL_SIZE-1))
+    voxel_coord = np.stack([v.grid_index for v in voxel_grid.get_voxels()])
+    coord_ten = torch.from_numpy(np.expand_dims(voxel_coord, axis=0)).long()
+
+    voxel_ten = voxelize_xyz(coord_ten, VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE, already_mem=True).squeeze(0)
+    return meshes_ten, voxel_ten
+    # return vertex_ten, faces_ten, voxel_ten
+
+
+
+    
 
 
 
@@ -73,6 +105,9 @@ class ObjaverseDataset(Dataset):
         
         # All target mesh
         self.all_mesh = None
+
+        # All target voxel
+        self.all_voxel = None
 
         # All corresponding categoty label
         self.all_label = []
@@ -104,10 +139,21 @@ class ObjaverseDataset(Dataset):
         )
 
         # Read All 3d Object
-        print("Reading All Mesh ...")
-        self.all_mesh = Parallel(n_jobs=self.args["num_worker"])(
-                delayed(readGLBToMesh)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
+        # print("Reading All Mesh ...")
+        # self.all_mesh = Parallel(n_jobs=self.args["num_worker"])(
+        #         delayed(readGLBToMesh)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
+        # )
+
+
+        print("Reading All Mesh & Voxel ...")
+        meshAndVox = Parallel(n_jobs=self.args["num_worker"])(
+                delayed(readGLBToMeshAndVox)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
         )
+        self.all_mesh, self.all_voxel = zip(*meshAndVox)
+
+        # vertex_ten, faces_ten, voxel_ten = zip(*meshAndVox)
+        # self.all_mesh = Meshes(vertex_ten, faces_ten)
+        # self.all_voxel = voxel_ten
 
         # Testing
         # no_mesh_data = []
@@ -119,7 +165,7 @@ class ObjaverseDataset(Dataset):
         # print(no_mesh_data)
 
     def __getitem__(self, idx):
-        return self.all_img[idx], self.all_mesh[idx]
+        return self.all_img[idx], self.all_mesh[idx], self.all_voxel[idx]
 
     def __len__(self):
         return len(self.all_path_prefix)
@@ -128,14 +174,16 @@ class ObjaverseDataset(Dataset):
 # Input:
 # Output: Dict
 def collate_batched(data):
-    img, mesh = zip(*data)
+    img, mesh, vox = zip(*data)
 
     batched_img_ten = torch.stack(img).permute(0,3,1,2)
     batched_mesh_ten = pytorch3d.structures.join_meshes_as_batch(mesh)
+    batched_vox_ten = torch.stack(vox)
 
     out_dict = {
         "img": batched_img_ten, 
-        "mesh": batched_mesh_ten
+        "mesh": batched_mesh_ten,
+        "vox": batched_vox_ten
     }
 
     return out_dict
