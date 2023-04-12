@@ -19,3 +19,6 @@ pip install black usort flake8 flake8-bugbear flake8-comprehensions
 
 # install pytorch3d
 conda install pytorch3d -c pytorch3d
+
+# install hydra to read configuration
+pip install hydra-core --upgrade
