@@ -83,7 +83,7 @@ class MeshRCNNROIHeads(nn.Module):
                 3: conv5_3 features
                 interpolated: bilinear interpolated features of shape (2048, cfg.bilinear_interpolation.output_size, cfg.bilinear_interpolation.output_size)
         Output:
-            Voxel, Mesh
+            Voxel, Mesh(A list containing Mesh objects from three refinement stages)
         """
         # predict voxels with extracted image features
         pred_voxel = self.forward_voxel(feature_dict)
@@ -96,8 +96,8 @@ class MeshRCNNROIHeads(nn.Module):
         else:
             raise ValueError("No support for class specific predictions")
 
-        # TODO: Refinement Stage1, 2, 3 (defined in mesh_head)
-        refined_mesh = self.mesh_head(feature_dict, init_mesh)
+        # Obtain Refined Meshes from three refinement stages
+        refined_mesh = self.mesh_head(feature_dict, init_mesh)  # [refined_meshes_from_stage1, refined_meshes_from_stage2, refined_meshes_from_stage3]
         return pred_voxel, refined_mesh
 
 

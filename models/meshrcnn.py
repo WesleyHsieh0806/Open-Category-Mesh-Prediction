@@ -78,7 +78,7 @@ class MeshRCNN(nn.Module):
         Output:
             pred_voxel: Voxel of shape (B, VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
             refined_mesh:
-                Mesh object
+                A list containing Mesh objects from three refinement stages
         """
         if not self.training:
             return self.inference(images)
@@ -102,7 +102,7 @@ class MeshRCNN(nn.Module):
         Output:
             pred_voxel: Voxel of shape (B, VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
             refined_mesh:
-                Mesh object
+                A list containing Mesh objects from three refinement stages
         """
         # Extract image features
         # keys: '0', '1', '2', '3'
