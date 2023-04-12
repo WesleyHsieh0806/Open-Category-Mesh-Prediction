@@ -2,5 +2,38 @@ dataloader:
   data_root: /path/to/Objaverse/Root
   num_worker: 8
   split_data_path: /path/to/split/json
-  train: True
   batch_size: 16
+  train: True
+
+backbone:
+  type: resnet50
+  pretrained: True
+
+bilinear_interpolation:
+  output_size: [24, 24]
+
+roi_head:
+  type: MeshRCNNROIHeads
+  NUM_CLASSES: None
+  ROI_VOXEL_HEAD:
+    input_shape: [2048, 24, 24]
+    CUBIFY_THRESH: 0.2
+    voxel_loss_weight: 1.0
+    NUM_CONV: 4
+    CONV_DIM: 256
+    VOXEL_SIZE: 48
+    CLASS_AGNOSTIC: True
+
+  ROI_MESH_HEAD:
+    NAME: "MeshRCNNGraphConvHead"
+    INPUT_CHANNELS: [256, 512, 1024, 2048]
+    NUM_STAGES: 3
+    NUM_RES_GRAPH_CONVS: 2
+    GRAPH_CONV_DIM: 128
+    GRAPH_CONV_INIT: "normal"
+    GT_NUM_SAMPLES: 5000
+    PRED_NUM_SAMPLES: 5000
+    CHAMFER_LOSS_WEIGHT: 1.0
+    NORMALS_LOSS_WEIGHT: 0.0
+    EDGE_LOSS_WEIGHT: 0.2
+    GT_COORD_THRESH: 5.0
