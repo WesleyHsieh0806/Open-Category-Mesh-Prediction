@@ -1,26 +1,26 @@
 import time
 import torch
 from models import MeshRCNN
-from dataset.dataset import ObjaverseDataset
+from dataset.dataset import get_dataloader
 from  import evaluate #??
 import matplotlib.pyplot as plt 
 import numpy as np
 
-def save_plot(thresholds, avg_f1_score, args):
+def save_plot(thresholds, avg_f1_score):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(thresholds, avg_f1_score, marker='o')
     ax.set_xlabel('Threshold')
     ax.set_ylabel('F1-score')
-    ax.set_title(f'Evaluation {args.type}')
-    plt.savefig(f'eval_{args.type}', bbox_inches='tight')
+    ax.set_title(f'Evaluation')
+    plt.savefig(f'eval_baseline', bbox_inches='tight')
 
 def evaluate_model(cfg):
-    obj_dataset = ObjaverseDataset(cfg.dataloader_test) #?? can use
+    obj_dataset = get_dataloader(cfg.dataloader_test) #?? can use
     loader = torch.utils.data.DataLoader(
         obj_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
+        batch_size=cfg.training.batch_size,
+        num_workers=cfg.training.num_workers,
         pin_memory=True,
         drop_last=True)
     eval_loader = iter(loader)
@@ -64,7 +64,7 @@ def evaluate_model(cfg):
         num = step // 50 
         if img_step == 0:
             render_mesh(predictions, output_path=f'images/q_2-3-pred-{num}.gif')
-            render_mesh(mesh_gt.to(args.device), output_path=f'images/q_2-3-gt-{num}.gif')
+            render_mesh(mesh_gt.to(cfg.training.device), output_path=f'images/q_2-3-gt-{num}.gif')
 
       
 
@@ -83,7 +83,7 @@ def evaluate_model(cfg):
 
     avg_f1_score = torch.stack(avg_f1_score).mean(0)
 
-    save_plot(thresholds, avg_f1_score,  args)
+    save_plot(thresholds, avg_f1_score)
     print('Done!')
 
 @hydra.main(version_base=None, config_path="../configs", config_name="baseline")
