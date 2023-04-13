@@ -26,10 +26,7 @@ def train_model(cfg):
 
     model = MeshRCNN(cfg)
 
-    model = torch.nn.DataParallel(model)
-
-    # model.to(cfg.training.device)
-    model = model.cuda()
+    model.to(cfg.training.device)
     model.train()
 
 
@@ -71,13 +68,9 @@ def train_model(cfg):
         images_gt, mesh_gt, voxel_gt = feed_dict["img"], feed_dict["mesh"], feed_dict["vox"]
         read_time = time.time() - read_start_time
 
-        # images_gt = images_gt.to(cfg.training.device)
-        # mesh_gt = mesh_gt.to(cfg.training.device)
-        # voxel_gt = voxel_gt.to(cfg.training.device)
-
-        images_gt = images_gt.cuda()
-        mesh_gt = mesh_gt.cuda()
-        voxel_gt = voxel_gt.cuda()
+        images_gt = images_gt.to(cfg.training.device)
+        mesh_gt = mesh_gt.to(cfg.training.device)
+        voxel_gt = voxel_gt.to(cfg.training.device)
 
         pred_voxel, refined_mesh = model(images_gt)
 
