@@ -8,7 +8,7 @@ from pytorch3d.structures import Meshes
 # from pytorch3d.io.experimental_gltf_io import MeshGlbFormat
 
 
-from vox_utils import voxelize_xyz
+from .vox_utils import voxelize_xyz
 import open3d as o3d
 
 # Python 3.9
@@ -191,14 +191,14 @@ def collate_batched(data):
 
 
 
-def get_dataloader(args):
+def get_dataloader(cfg):
     
-    dataset = ObjaverseDataset(args)
+    dataset = ObjaverseDataset(cfg)
     dataloader = DataLoader(
         dataset,
-        batch_size=args["batch_size"],
-        shuffle=args["train"],
-        num_workers=args["num_worker"],
+        batch_size=cfg.batch_size,
+        shuffle=cfg.train,
+        num_workers=cfg.num_worker,
         collate_fn=collate_batched
     )
 

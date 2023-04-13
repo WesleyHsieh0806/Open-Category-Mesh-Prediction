@@ -10,6 +10,7 @@ from pytorch3d.structures import Meshes
 from torch import nn
 from torch.nn import functional as F
 
+from pytorch3d.structures import join_meshes_as_batch
 
 
 class ResGraphConv(nn.Module):
@@ -25,7 +26,7 @@ class ResGraphConv(nn.Module):
                       |
                     output
         '''
-        super().__init__()
+        super(ResGraphConv, self).__init__()
         self.graph_conv1 = GraphConv(input_dim, output_dim, init=gconv_init, directed=directed)  # very similar to linear layer
         self.graph_conv2 = GraphConv(output_dim, output_dim, init=gconv_init, directed=directed)  # very similar to linear layer
         self.skip_proj = nn.Linear(input_dim, output_dim) if input_dim != output_dim else None
@@ -167,6 +168,9 @@ class MeshRCNNGraphConvHead(nn.Module):
         for stage in self.stages:
             mesh, vert_feats = stage(feature_dict, mesh, vert_feats=vert_feats)
             meshes.append(mesh)
+
+        # meshes = join_meshes_as_batch(meshes)
+        
         return meshes
 
 

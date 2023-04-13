@@ -11,29 +11,37 @@ def calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg):
 
 	v_loss = voxel_loss(pred_voxel, voxel_gt)
 
-	sample_trg, sample_trg_normals = sample_points_from_meshes(mesh_gt, 
-							    num_samples=cfg.PRED_NUM_SAMPLES, 
-								return_normals=True)
-	sample_pred, sample_pred_normals = sample_points_from_meshes(refined_mesh, 
-							      num_samples=cfg.PRED_NUM_SAMPLES,
-								  return_normals=True)
+	all_c_loss = []
+	all_n_loss = []
+	all_e_loss = []
 
-	c_loss, n_loss = chamfer_loss(
-				sample_pred, sample_trg, 
-		    	x_normals=sample_pred_normals,
-				y_normals=sample_trg_normals
-			)
+	B = pred_voxel.size(0)
 
-	e_loss = mesh_edge_loss(sample_pred, sample_trg)
+	# for stage_idx in range(cfg.NUM_STAGES):
+	# 	mesh_pred = refined_mesh[stage_idx*B:(stage_idx+1)*B]
 
-	# l_loss = smoothness_loss(sample_pred)
+	for mesh_pred in refined_mesh:
+		sample_trg, sample_trg_normals = sample_points_from_meshes(mesh_gt, 
+									num_samples=cfg.PRED_NUM_SAMPLES, 
+									return_normals=True)
 
-	loss = cfg.CHAMFER_LOSS_WEIGHT * c_loss \
-		+ cfg.NORMALS_LOSS_WEIGHT * n_loss \
-		+ cfg.EDGE_LOSS_WEIGHT * e_loss \
-		+ cfg.VOXEL_LOSS_WEIGHT * v_loss
+		sample_pred, sample_pred_normals = sample_points_from_meshes(mesh_pred, 
+									num_samples=cfg.PRED_NUM_SAMPLES,
+									return_normals=True)
 
-	return loss
+		c_loss, n_loss = chamfer_distance(sample_pred, sample_trg, 
+				x_normals=sample_pred_normals, y_normals=sample_trg_normals,
+				batch_reduction="mean", point_reduction="sum")
+
+		e_loss = mesh_edge_loss(mesh_pred)
+
+		# l_loss = smoothness_loss(sample_pred)
+
+	all_c_loss = sum(all_c_loss)
+	all_n_loss = sum(all_n_loss)
+	all_e_loss = sum(all_e_loss)
+
+	return v_loss, all_c_loss, all_n_loss, all_e_loss
 
 
 
