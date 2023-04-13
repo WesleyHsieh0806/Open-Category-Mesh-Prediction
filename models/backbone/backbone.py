@@ -28,6 +28,7 @@ class CustomRenset(nn.Module):
                 3: tensor of shape(B, 2048, H/32, W/32)
             }
         '''
+
         return self.body(image)
 
 

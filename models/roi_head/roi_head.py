@@ -37,7 +37,7 @@ class MeshRCNNROIHeads(nn.Module):
         input_shape = cfg.roi_head.ROI_VOXEL_HEAD.input_shape
         # fmt: on
 
-        self.voxel_loss_weight = cfg.roi_head.ROI_VOXEL_HEAD.voxel_loss_weight
+        self.voxel_loss_weight = cfg.roi_head.ROI_VOXEL_HEAD.VOXEL_LOSS_WEIGHT
         self.cubify_thresh = cfg.roi_head.ROI_VOXEL_HEAD.CUBIFY_THRESH
 
         self.voxel_head = build_voxel_head(cfg, input_shape)
@@ -102,7 +102,7 @@ class MeshRCNNROIHeads(nn.Module):
 
 
 
-        
+
 get_roi_head_by_name = {
     "MeshRCNNROIHeads": lambda cfg: MeshRCNNROIHeads(cfg),
 }

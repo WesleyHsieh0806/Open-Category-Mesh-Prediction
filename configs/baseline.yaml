@@ -1,14 +1,14 @@
 dataloader:
-  data_root: /mnt/data/objaverse
+  data_root: /media/godel/HDD/jimmy/Objaverse/
   num_worker: 8
-  split_data_path: /home/ubuntu/Open-Category-Mesh-Prediction/dataset/train_seen_uid.json
-  batch_size: 16
+  split_data_path: /home/jimmy/HumanPose/NovelObject/Open-Category-Mesh-Prediction/dataset/train_seen_uid.json
+  batch_size: 1
   train: True
 
 dataloader_test:
-  data_root: /mnt/data/objaverse
+  data_root: /media/godel/HDD/jimmy/Objaverse/
   num_worker: 8
-  split_data_path: /home/ubuntu/Open-Category-Mesh-Prediction/dataset/test_seen_uid.json
+  split_data_path: /home/jimmy/HumanPose/NovelObject/Open-Category-Mesh-Prediction/dataset/test_seen_uid.json
   batch_size: 16
   train: False
 
@@ -46,8 +46,7 @@ roi_head:
     GT_COORD_THRESH: 5.0
 
 training:
-  num_epochs: 10000
-  batch_size: 64
+  max_iter: 10000
   lr: 0.0005
 
   checkpoint_path: ./checkpoints/baseline
