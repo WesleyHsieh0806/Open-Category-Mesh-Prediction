@@ -2,9 +2,11 @@ import time
 import torch
 from models import MeshRCNN
 from dataset.dataset import get_dataloader
-# from  import calculate_loss #??
+from losses import calculate_loss
 import matplotlib.pyplot as plt 
 import numpy as np
+
+
 
 def train_model(cfg):
     obj_dataset = get_dataloader(cfg.dataloader) 
@@ -54,12 +56,16 @@ def train_model(cfg):
 
         feed_dict = next(train_loader)
 
-        images_gt, mesh_gt, voxel_gt = feed_dict # 3 meshes and voxels?
+        images_gt, mesh_gt, voxel_gt = feed_dict["img"], feed_dict["mesh"], feed_dict["vox"]
         read_time = time.time() - read_start_time
+
+        images_gt.to(cfg.training.device)
+        mesh_gt.to(cfg.training.device)
+        voxel_gt.to(cfg.training.device)
 
         pred_voxel, refined_mesh = model(images_gt)
 
-        loss = calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh)
+        loss = calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg)
 
         optimizer.zero_grad()
         loss.backward()

@@ -25,7 +25,7 @@ roi_head:
   ROI_VOXEL_HEAD:
     input_shape: [2048, 24, 24]
     CUBIFY_THRESH: 0.2
-    voxel_loss_weight: 1.0
+    VOXEL_LOSS_WEIGHT: 1.0
     NUM_CONV: 4
     CONV_DIM: 256
     VOXEL_SIZE: 48
