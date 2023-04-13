@@ -1,18 +1,19 @@
 import time
 import torch
 from models import MeshRCNN
-from dataset.dataset import ObjaverseDataset
-from  import calculate_loss #??
+from dataset.dataset import get_dataloader
+from losses import calculate_loss
 import matplotlib.pyplot as plt 
 import numpy as np
 
 
+
 def train_model(cfg):
-    obj_dataset = ObjaverseDataset(cfg.dataloader) #?? can use
+    obj_dataset = get_dataloader(cfg.dataloader) 
     loader = torch.utils.data.DataLoader(
         obj_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
+        batch_size=cfg.training.batch_size,
+        num_workers=cfg.training.num_workers,
         pin_memory=True,
         drop_last=True)
     train_loader = iter(loader)
@@ -55,12 +56,16 @@ def train_model(cfg):
 
         feed_dict = next(train_loader)
 
-        images_gt, mesh_gt, voxel_gt = feed_dict # 3 meshes and voxels?
+        images_gt, mesh_gt, voxel_gt = feed_dict["img"], feed_dict["mesh"], feed_dict["vox"]
         read_time = time.time() - read_start_time
+
+        images_gt.to(cfg.training.device)
+        mesh_gt.to(cfg.training.device)
+        voxel_gt.to(cfg.training.device)
 
         pred_voxel, refined_mesh = model(images_gt)
 
-        loss = calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh)
+        loss = calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg)
 
         optimizer.zero_grad()
         loss.backward()
@@ -87,13 +92,13 @@ def train_model(cfg):
 
             torch.save(data_to_store, checkpoint_path)
 
-        print("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, args.max_iter, total_time, read_time, iter_time, loss_vis))
+        print("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, cfg.training.max_iter, total_time, read_time, iter_time, loss_vis))
 
         losses.append(loss_vis)
     print('Done!')
 
-    plt.plot(np.arange(args.max_iter), losses, marker='o')
-    plt.savefig(f'loss_{args.type}.png')
+    plt.plot(np.arange(cfg.training.max_iter), losses, marker='o')
+    plt.savefig(f'train_loss_baseline.png')
 
 @hydra.main(version_base=None, config_path="../configs", config_name="baseline")
 def main(cfg: DictConfig):
