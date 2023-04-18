@@ -4,7 +4,7 @@ from torchvision.models.feature_extraction import create_feature_extractor
 from utils import *
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from train_q2 import ResNet
+# from train_q2 import ResNet
 
 def get_feats(model, test_loader, n_class):
     #TODO: return_nodes, where to get the features
