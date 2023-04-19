@@ -9,8 +9,9 @@ from pytorch3d.structures import Meshes
 
 
 from .vox_utils import voxelize_xyz
-import open3d as o3d
-
+# import open3d as o3d
+import trimesh 
+from trimesh.voxel import creation
 # Python 3.9
 # conda install pytorch==1.13.0 torchvision==0.14.0 pytorch-cuda=11.6 -c pytorch -c nvidia
 # conda install -c fvcore -c iopath -c conda-forge fvcore iopath
@@ -53,9 +54,30 @@ def readImage(fn):
 
 
 
-def readGLBToMesh(fn):
-    mesh = io.load_mesh(fn, include_textures=False, device="cpu")
-    return mesh
+def readGLBToMeshAndVoxTrimesh(fn):
+    # mesh = io.load_mesh(fn, include_textures=False, device="cpu")
+    
+    mesh = trimesh.load(fn, force='mesh')  # Trimesh Object
+    
+    # normalize vertices to [-0.5, 0.5]
+    min_bound = np.array(mesh.bounds[0])  # (3, )
+    max_bound = np.array(mesh.bounds[1])  # (3, )
+    scale = 1 / np.max(max_bound - min_bound)
+    centroid = mesh.centroid
+    mesh = mesh.apply_transform([[scale, 0, 0, -(centroid[0]*scale)],
+                          [0, scale, 0, -(centroid[1]*scale)],
+                          [0, 0, scale, -(centroid[2]*scale)],
+                          [0, 0, 0, 1]])
+    
+    # transfer mesh to pytorch3d format
+    vertices = torch.tensor(mesh.vertices).float().unsqueeze(0)
+    faces = torch.tensor(mesh.faces).float().unsqueeze(0)
+    meshes_pytorch3d = Meshes(vertices, faces)
+
+    vox = mesh.voxelized(pitch=1./(VOXEL_SIZE-1))
+    coord_indicies = torch.from_numpy(np.expand_dims(vox.sparse_indices, axis=0)).long()
+    voxel_ten = voxelize_xyz(coord_indicies, VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE, already_mem=True).float().squeeze(0)
+    return meshes_pytorch3d, voxel_ten
 
 
 def readGLBToMeshAndVox(fn):
@@ -134,9 +156,10 @@ class ObjaverseDataset(Dataset):
 
         # Read All Image
         print("Reading All Image ...")
-        self.all_img = Parallel(n_jobs=self.args["num_worker"])(
-            delayed(readImage)(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix)
-        )
+        # self.all_img = Parallel(n_jobs=self.args["num_worker"])(
+        #     delayed(readImage)(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix)
+        # )
+        self.all_img = [readImage(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix)]
 
         # Read All 3d Object
         # print("Reading All Mesh ...")
@@ -146,9 +169,10 @@ class ObjaverseDataset(Dataset):
 
 
         print("Reading All Mesh & Voxel ...")
-        meshAndVox = Parallel(n_jobs=self.args["num_worker"])(
-                delayed(readGLBToMeshAndVox)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
-        )
+        # meshAndVox = Parallel(n_jobs=self.args["num_worker"])(
+        #         delayed(readGLBToMeshAndVoxTrimesh)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
+        # )
+        meshAndVox = [readGLBToMeshAndVoxTrimesh(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)]
         self.all_mesh, self.all_voxel = zip(*meshAndVox)
 
         # vertex_ten, faces_ten, voxel_ten = zip(*meshAndVox)

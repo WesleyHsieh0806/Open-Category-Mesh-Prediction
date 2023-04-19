@@ -2,31 +2,42 @@ import time
 import matplotlib.pyplot as plt 
 import numpy as np
 import os
+import logging
+import sys 
 
 from omegaconf import DictConfig, OmegaConf
 import hydra
-
 
 import torch
 
 
 from models import MeshRCNN
 from dataset.dataset import get_dataloader
-from .losses import calculate_loss
+from losses import calculate_loss
+from logger import setup_logger
 
+from detectron2.engine.defaults import create_ddp_model
+from detectron2.engine import (
+    launch,
+)
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "3,4,5,6"
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
 
 
-def train_model(cfg):
-    obj_dataset, loader = get_dataloader(cfg.dataloader) 
-    train_loader = iter(loader)
+def train_model(cfg, train_loader):
+    # setup logger
+    logger = setup_logger("train", cfg)
+
 
     model = MeshRCNN(cfg)
 
     model.to(cfg.training.device)
+
+    # DDP
+    model = create_ddp_model(model, **cfg.train.ddp)
+
     model.train()
 
 
@@ -44,17 +55,17 @@ def train_model(cfg):
 
         # Resume training if requested.
         if cfg.training.resume and os.path.isfile(checkpoint_path):
-            print(f"Resuming from checkpoint {checkpoint_path}.")
+            logger.info(f"Resuming from checkpoint {checkpoint_path}.")
             loaded_data = torch.load(checkpoint_path)
             model.load_state_dict(loaded_data["model"])
             start_epoch = loaded_data["epoch"]
 
-            print(f"   => resuming from epoch {start_epoch}.")
+            logger.info(f"   => resuming from epoch {start_epoch}.")
             optimizer_state_dict = loaded_data["optimizer"]
 
     losses = []
 
-    print("Starting training !")
+    logger.info("Starting training !")
     for step in range(start_iter, cfg.training.max_iter+1):
         iter_start_time = time.time()
 
@@ -96,7 +107,7 @@ def train_model(cfg):
             and len(cfg.training.checkpoint_path) > 0
             and epoch > 0
         ):
-            print(f"Storing checkpoint {checkpoint_path}.")
+            logger.info(f"Storing checkpoint {checkpoint_path}.")
 
             data_to_store = {
                 "model": model.state_dict(),
@@ -106,17 +117,31 @@ def train_model(cfg):
 
             torch.save(data_to_store, checkpoint_path)
 
-        print("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, cfg.training.max_iter, total_time, read_time, iter_time, loss_vis))
+        logger.info("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, cfg.training.max_iter, total_time, read_time, iter_time, loss_vis))
 
         losses.append(loss_vis)
-    print('Done!')
+    logger.info('Done!')
 
     plt.plot(np.arange(cfg.training.max_iter), losses, marker='o')
-    plt.savefig(f'train_loss_baseline.png')
+    plt.savefig(os.path.join(cfg.training.log_dir, 'train_loss_baseline.png'))
 
 @hydra.main(version_base=None, config_path="../configs", config_name="baseline")
 def main(cfg: DictConfig):
-    train_model(cfg)
+    port = 2**15 + 2**14 + hash(os.getuid() if sys.platform != "win32" else 1) % 2**14
+    dist_url = "tcp://127.0.0.1:{}".format(port)
+
+    # create dataset
+    obj_dataset, loader = get_dataloader(cfg.dataloader) 
+    train_loader = iter(loader)
+
+    launch(
+        train_model,
+        cfg.ddp.num_gpus,
+        num_machines=cfg.ddp.num_machines,
+        machine_rank=cfg.ddp.machine_rank,
+        dist_url=dist_url,
+        args=(cfg, train_loader),
+    )
 
 if __name__ == '__main__':
     main()
