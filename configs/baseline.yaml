@@ -46,12 +46,12 @@ roi_head:
     GT_COORD_THRESH: 5.0
 
 training:
-  max_iter: 10000
+  max_iter: 30
   lr: 0.0005
 
   log_dir: /ssd1/chengyeh/Open-Category-Experiment/Baseline
   checkpoint_path: /ssd1/chengyeh/Open-Category-Experiment/Baseline/baseline
-  checkpoint_interval: 1000
+  checkpoint_interval: 10
   resume: True
 
 

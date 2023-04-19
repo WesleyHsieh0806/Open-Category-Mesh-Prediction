@@ -39,7 +39,7 @@ class MeshRCNNROIHeads(nn.Module):
 
         self.voxel_loss_weight = cfg.roi_head.ROI_VOXEL_HEAD.VOXEL_LOSS_WEIGHT
         self.cubify_thresh = cfg.roi_head.ROI_VOXEL_HEAD.CUBIFY_THRESH
-
+        self.voxel_size = cfg.roi_head.ROI_VOXEL_HEAD.VOXEL_SIZE
         self.voxel_head = build_voxel_head(cfg, input_shape)
         # attribute setup
         self.cls_agnostic_voxel = cfg.roi_head.ROI_VOXEL_HEAD.CLASS_AGNOSTIC
@@ -92,6 +92,19 @@ class MeshRCNNROIHeads(nn.Module):
         if self.cls_agnostic_voxel:
             with torch.no_grad():
                 vox_in = pred_voxel.sigmoid().squeeze(1)  # (N, V, V, V)
+                
+                # deal with empty mesh
+                V = self.voxel_size
+                N = vox_in.shape[0]
+                active_voxels = vox_in > self.cubify_thresh
+                voxels_per_mesh = (active_voxels.reshape([N, -1]).sum(dim=1)).tolist()
+                start = V // 4
+                stop = start + V // 2
+                
+                for i in range(N):
+                    if voxels_per_mesh[i] == 0:
+                        # empty mesh found here
+                        vox_in[i, start:stop, start:stop, start:stop] = 1
                 init_mesh = cubify(vox_in, self.cubify_thresh)  # 1
         else:
             raise ValueError("No support for class specific predictions")

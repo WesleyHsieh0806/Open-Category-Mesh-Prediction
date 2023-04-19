@@ -160,7 +160,7 @@ class ObjaverseDataset(Dataset):
         # self.all_img = Parallel(n_jobs=self.args["num_worker"])(
         #     delayed(readImage)(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix)
         # )
-        self.all_img = [readImage(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix)]
+        self.all_img = [readImage(os.path.join(p, "image.jpeg")) for p in tqdm(self.all_path_prefix[:20])]
 
         # Read All 3d Object
         # print("Reading All Mesh ...")
@@ -173,7 +173,7 @@ class ObjaverseDataset(Dataset):
         # meshAndVox = Parallel(n_jobs=self.args["num_worker"])(
         #         delayed(readGLBToMeshAndVoxTrimesh)(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)
         # )
-        meshAndVox = [readGLBToMeshAndVoxTrimesh(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix)]
+        meshAndVox = [readGLBToMeshAndVoxTrimesh(os.path.join(p, "3Dobject.glb")) for p in tqdm(self.all_path_prefix[:20])]
         self.all_mesh, self.all_voxel = zip(*meshAndVox)
 
         # vertex_ten, faces_ten, voxel_ten = zip(*meshAndVox)
@@ -196,7 +196,7 @@ class ObjaverseDataset(Dataset):
                 'voxel': self.all_voxel[idx]}
 
     def __len__(self):
-        return len(self.all_path_prefix)
+        return len(self.all_path_prefix[:20])
 
 
 # Input:

@@ -15,7 +15,8 @@ class CustomRenset(nn.Module):
         self.body = create_feature_extractor(
             self.model, return_nodes={f'layer{k}': str(v)
                              for v, k in enumerate([1, 2, 3, 4])})
-
+        self.model.fc = None 
+        self.body.fc = None
     def forward(self, image):
         '''
         * Input: image of shape (B, 3, H, W)

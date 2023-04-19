@@ -49,7 +49,7 @@ def train_model(cfg, args):
         model,
         device_ids=[args.local_rank],
         output_device=args.local_rank,
-        find_unused_parameters=True
+        find_unused_parameters=False
     )
 
     model.train()
@@ -62,6 +62,7 @@ def train_model(cfg, args):
     start_time = time.time()
 
     checkpoint_path = cfg.training.checkpoint_path
+    losses = []
     if len(checkpoint_path) > 0:
         # Make the root of the experiment directory.
         checkpoint_dir = os.path.split(checkpoint_path)[0]
@@ -72,19 +73,21 @@ def train_model(cfg, args):
             logger.info(f"Resuming from checkpoint {checkpoint_path}.")
             loaded_data = torch.load(checkpoint_path)
             model.load_state_dict(loaded_data["model"])
-            start_epoch = loaded_data["epoch"]
+            start_iter = loaded_data["step"]
+            losses = loaded_data["losses"]
 
-            logger.info(f"   => resuming from epoch {start_epoch}.")
+            logger.info(f"   => resuming from epoch {start_iter}.")
             optimizer_state_dict = loaded_data["optimizer"]
 
-    losses = []
 
     logger.info("Starting training !")
+    epoch = 1
     for step in range(start_iter, cfg.training.max_iter+1):
         iter_start_time = time.time()
 
         if step % len(train_loader) == 0: #restart after one epoch
             train_loader = iter(loader)
+            epoch += 1
 
         read_start_time = time.time()
 
@@ -115,6 +118,10 @@ def train_model(cfg, args):
 
         loss_vis = loss.cpu().item()
 
+        logger.info("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, cfg.training.max_iter, total_time, read_time, iter_time, loss_vis))
+
+        losses.append(loss_vis)
+
         # Checkpoint.
         if (
             step % cfg.training.checkpoint_interval == 0
@@ -127,16 +134,13 @@ def train_model(cfg, args):
                 "model": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 "step": step,
+                "losses": losses
             }
 
             torch.save(data_to_store, checkpoint_path)
-
-        logger.info("[%4d/%4d]; ttime: %.0f (%.2f, %.2f); loss: %.3f" % (step, cfg.training.max_iter, total_time, read_time, iter_time, loss_vis))
-
-        losses.append(loss_vis)
     logger.info('Done!')
 
-    plt.plot(np.arange(cfg.training.max_iter), losses, marker='o')
+    plt.plot(np.arange(len(losses)), losses, marker='o')
     plt.savefig(os.path.join(cfg.training.log_dir, 'train_loss_baseline.png'))
 
 
