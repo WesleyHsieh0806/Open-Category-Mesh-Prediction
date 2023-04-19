@@ -17,9 +17,6 @@ def calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg):
 
 	B = pred_voxel.size(0)
 
-	# for stage_idx in range(cfg.NUM_STAGES):
-	# 	mesh_pred = refined_mesh[stage_idx*B:(stage_idx+1)*B]
-
 	for mesh_pred in refined_mesh:
 		sample_trg, sample_trg_normals = sample_points_from_meshes(mesh_gt, 
 									num_samples=cfg.PRED_NUM_SAMPLES, 

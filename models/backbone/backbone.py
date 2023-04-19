@@ -10,7 +10,7 @@ __all__ = ["get_backbone"]
 
 class CustomRenset(nn.Module):
     def __init__(self, model):
-        super().__init__()
+        super(CustomRenset, self).__init__()
         self.model = model
         self.body = create_feature_extractor(
             self.model, return_nodes={f'layer{k}': str(v)

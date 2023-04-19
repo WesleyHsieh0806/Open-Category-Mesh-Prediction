@@ -74,9 +74,9 @@ class MeshRefinementStage(nn.Module):
         # one graph convs
         self.gconv = GraphConv(hidden_dim, 3, init=gconv_init, directed=False)
 
-        # initialization
-        nn.init.normal_(self.bottleneck.weight, mean=0.0, std=0.01)
-        nn.init.constant_(self.bottleneck.bias, 0)
+        # # initialization
+        # nn.init.normal_(self.bottleneck.weight, mean=0.0, std=0.01)
+        # nn.init.constant_(self.bottleneck.bias, 0)
 
 
     def forward(self, feature_dict, mesh, vert_feats=None):
@@ -168,8 +168,6 @@ class MeshRCNNGraphConvHead(nn.Module):
         for stage in self.stages:
             mesh, vert_feats = stage(feature_dict, mesh, vert_feats=vert_feats)
             meshes.append(mesh)
-
-        # meshes = join_meshes_as_batch(meshes)
         
         return meshes
 

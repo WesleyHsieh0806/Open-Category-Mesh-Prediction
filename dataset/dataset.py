@@ -9,6 +9,7 @@ from pytorch3d.structures import Meshes
 
 
 from .vox_utils import voxelize_xyz
+# from vox_utils import voxelize_xyz
 import open3d as o3d
 
 # Python 3.9
@@ -25,6 +26,7 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 import numpy as np
 
+from torch.utils.data.distributed import DistributedSampler
 
 import cv2
 
@@ -165,7 +167,7 @@ class ObjaverseDataset(Dataset):
         # print(no_mesh_data)
 
     def __getitem__(self, idx):
-        return self.all_img[idx], self.all_mesh[idx], self.all_voxel[idx]
+        return self.all_img[idx], self.all_mesh[idx], self.all_voxel[idx], self.all_path_prefix[idx]
 
     def __len__(self):
         return len(self.all_path_prefix)
@@ -174,7 +176,7 @@ class ObjaverseDataset(Dataset):
 # Input:
 # Output: Dict
 def collate_batched(data):
-    img, mesh, vox = zip(*data)
+    img, mesh, vox, fn = zip(*data)
 
     batched_img_ten = torch.stack(img).permute(0,3,1,2)
     batched_mesh_ten = pytorch3d.structures.join_meshes_as_batch(mesh)
@@ -183,7 +185,8 @@ def collate_batched(data):
     out_dict = {
         "img": batched_img_ten, 
         "mesh": batched_mesh_ten,
-        "vox": batched_vox_ten
+        "vox": batched_vox_ten,
+        "fn": fn
     }
 
     return out_dict
@@ -196,10 +199,15 @@ def get_dataloader(cfg):
     dataset = ObjaverseDataset(cfg)
     dataloader = DataLoader(
         dataset,
-        batch_size=cfg.batch_size,
-        shuffle=cfg.train,
-        num_workers=cfg.num_worker,
-        collate_fn=collate_batched
+        # batch_size=cfg.batch_size,
+        # shuffle=cfg.train,
+        # num_workers=cfg.num_worker,
+        batch_size=cfg["batch_size"],
+        # shuffle=cfg["train"],
+        num_workers=cfg["num_worker"],
+        collate_fn=collate_batched,
+        shuffle=False,
+        sampler=DistributedSampler(dataset),
     )
 
     return dataset, dataloader
@@ -208,12 +216,13 @@ def get_dataloader(cfg):
 
 if __name__ == "__main__":
 
+
     args = {
         "data_root": "/media/godel/HDD/jimmy/Objaverse/",
-        "num_worker": 8,
+        "num_worker": 2,
         "split_data_path": "/home/jimmy/HumanPose/NovelObject/Open-Category-Mesh-Prediction/dataset/train_seen_uid.json",
         "train": False,
-        "batch_size": 16
+        "batch_size": 1
     }
 
     train_dataset, train_dataloader = get_dataloader(args)
@@ -269,3 +278,8 @@ if __name__ == "__main__":
 
 # ['/media/godel/HDD/jimmy/Objaverse/data/earphone/538487c7b2f949f0b45ed438923941a9', 
 #  '/media/godel/HDD/jimmy/Objaverse/data/armoire/1a41218e823c4cba801bd2b3d71c9dff']
+
+
+# No Mesh
+# 5b770fed90954aefa5ba303ca77019f7
+# ca673585e3df4dbcb3bf95261a8af647

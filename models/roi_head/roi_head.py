@@ -27,7 +27,7 @@ class MeshRCNNROIHeads(nn.Module):
     """
 
     def __init__(self, cfg):
-        super().__init__()
+        super(MeshRCNNROIHeads, self).__init__()
         self._init_voxel_head(cfg)
         self._init_mesh_head(cfg)
 
@@ -99,7 +99,6 @@ class MeshRCNNROIHeads(nn.Module):
         # Obtain Refined Meshes from three refinement stages
         refined_mesh = self.mesh_head(feature_dict, init_mesh)  # [refined_meshes_from_stage1, refined_meshes_from_stage2, refined_meshes_from_stage3]
         return pred_voxel, refined_mesh
-
 
 
 

@@ -20,15 +20,15 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 
 
-# def ddp_setup(rank: int, world_size: int):
-#     """
-#     Args:
-#         rank: Unique identifier of each process
-#         world_size: Total number of processes
-#     """
-#     os.environ["MASTER_ADDR"] = "localhost"
-#     os.environ["MASTER_PORT"] = "12355"
-#     init_process_group(backend="nccl", rank=rank, world_size=world_size)
+def ddp_setup(rank: int, world_size: int):
+    """
+    Args:
+        rank: Unique identifier of each process
+        world_size: Total number of processes
+    """
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = "12355"
+    init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
 
 # ddp_setup()
@@ -36,6 +36,18 @@ from torch.distributed import init_process_group, destroy_process_group
 os.environ["CUDA_VISIBLE_DEVICES"] = "1,3"
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
+
+
+class Trainer():
+
+    @hydra.main(version_base=None, config_path="../configs", config_name="baseline")
+    def __init__(self, cfg: DictConfig):
+        
+        self.config = cfg
+
+
+    def train_model(self, epoch):
+        pass
 
 
 

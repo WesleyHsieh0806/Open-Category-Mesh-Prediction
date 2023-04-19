@@ -1,8 +1,8 @@
 dataloader:
   data_root: /media/godel/HDD/jimmy/Objaverse/
-  num_worker: 8
+  num_worker: 2
   split_data_path: /home/jimmy/HumanPose/NovelObject/Open-Category-Mesh-Prediction/dataset/train_seen_uid.json
-  batch_size: 1
+  batch_size: 2
   train: True
 
 dataloader_test:
@@ -47,7 +47,7 @@ roi_head:
 
 training:
   max_iter: 10000
-  lr: 0.0005
+  lr: 0.0001
 
   checkpoint_path: ./checkpoints/baseline
   checkpoint_interval: 1000

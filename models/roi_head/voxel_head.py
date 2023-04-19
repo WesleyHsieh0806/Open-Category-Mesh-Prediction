@@ -36,11 +36,11 @@ class VoxelRCNNConvUpsampleHead(nn.Module):
             if isinstance(module, nn.Conv2d) or isinstance(module, nn.ConvTranspose2d):
                 weight_init.c2_msra_fill(module)
 
-        # initialize weights
-        self.up_sample_conv.apply(init_weight) 
+        # # initialize weights
+        # self.up_sample_conv.apply(init_weight) 
 
-        # use normal distribution initialization for voxel prediction layer
-        nn.init.normal_(self.predictor.weight, std=0.001)
+        # # use normal distribution initialization for voxel prediction layer
+        # nn.init.normal_(self.predictor.weight, std=0.001)
 
 
     def forward(self, x):

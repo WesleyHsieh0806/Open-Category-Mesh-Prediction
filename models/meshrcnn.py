@@ -49,7 +49,7 @@ class MeshRCNN(nn.Module):
                     type: resnet50
                     pretrained: true
         """
-        super().__init__()
+        super(MeshRCNN, self).__init__()
         self.backbone = get_backbone(cfg.backbone.type, cfg.backbone.pretrained)
         self.bilinear_interpolation = nn.UpsamplingBilinear2d(size=tuple(cfg.bilinear_interpolation.output_size))
         self.training = True
@@ -94,6 +94,7 @@ class MeshRCNN(nn.Module):
         # obtain voxel, mesh prediction
         pred_voxel, refined_mesh = self.roi_head(feature_dict)
         return pred_voxel, refined_mesh
+
 
     def inference(self, images):
         """
