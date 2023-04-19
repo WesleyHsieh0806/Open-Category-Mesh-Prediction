@@ -36,6 +36,9 @@ def calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg):
 		e_loss = mesh_edge_loss(mesh_pred)
 
 		# l_loss = smoothness_loss(sample_pred)
+		all_c_loss.append(c_loss)
+		all_n_loss.append(e_loss)
+		all_e_loss.append(n_loss)
 
 	all_c_loss = sum(all_c_loss)
 	all_n_loss = sum(all_n_loss)

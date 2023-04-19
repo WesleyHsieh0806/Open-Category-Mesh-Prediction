@@ -2,7 +2,7 @@ dataloader:
   data_root: /ssd1/chengyeh/Objaverse
   num_worker: 8
   split_data_path: /ssd1/chengyeh/Objaverse/train_seen_uid.json
-  batch_size: 2
+  batch_size: 1
   train: True
 
 dataloader_test:
