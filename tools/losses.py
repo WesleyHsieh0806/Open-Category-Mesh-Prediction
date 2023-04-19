@@ -21,24 +21,27 @@ def calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg):
 	# 	mesh_pred = refined_mesh[stage_idx*B:(stage_idx+1)*B]
 
 	for mesh_pred in refined_mesh:
-		sample_trg, sample_trg_normals = sample_points_from_meshes(mesh_gt, 
-									num_samples=cfg.PRED_NUM_SAMPLES, 
-									return_normals=True)
+		try:
+			sample_trg, sample_trg_normals = sample_points_from_meshes(mesh_gt, 
+										num_samples=cfg.PRED_NUM_SAMPLES, 
+										return_normals=True)
 
-		sample_pred, sample_pred_normals = sample_points_from_meshes(mesh_pred, 
-									num_samples=cfg.PRED_NUM_SAMPLES,
-									return_normals=True)
+			sample_pred, sample_pred_normals = sample_points_from_meshes(mesh_pred, 
+										num_samples=cfg.PRED_NUM_SAMPLES,
+										return_normals=True)
 
-		c_loss, n_loss = chamfer_distance(sample_pred, sample_trg, 
-				x_normals=sample_pred_normals, y_normals=sample_trg_normals,
-				batch_reduction="mean", point_reduction="sum")
+			c_loss, n_loss = chamfer_distance(sample_pred, sample_trg, 
+					x_normals=sample_pred_normals, y_normals=sample_trg_normals,
+					batch_reduction="mean", point_reduction="sum")
 
-		e_loss = mesh_edge_loss(mesh_pred)
+			e_loss = mesh_edge_loss(mesh_pred)
 
-		# l_loss = smoothness_loss(sample_pred)
-		all_c_loss.append(c_loss)
-		all_n_loss.append(e_loss)
-		all_e_loss.append(n_loss)
+			# l_loss = smoothness_loss(sample_pred)
+			all_c_loss.append(c_loss)
+			all_n_loss.append(n_loss)
+			all_e_loss.append(e_loss)
+		except:
+			continue
 
 	all_c_loss = sum(all_c_loss)
 	all_n_loss = sum(all_n_loss)
