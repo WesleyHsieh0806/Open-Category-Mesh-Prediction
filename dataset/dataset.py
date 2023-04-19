@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-
+from torch.utils.data.distributed import DistributedSampler
+import logging
 
 import pytorch3d
 from pytorch3d.structures import Meshes
@@ -38,7 +39,7 @@ ORIGIN_IMAGE_SIZE  = (1080, 1920, 3)
 OUTPUT_IMAGE_SIZE = (144, 256, 3)
 
 VOXEL_SIZE = 48
-
+logger = logging.getLogger(__name__)
 # io = IO()
 # io.register_meshes_format(MeshGlbFormat())
 
@@ -189,7 +190,10 @@ class ObjaverseDataset(Dataset):
         # print(no_mesh_data)
 
     def __getitem__(self, idx):
-        return self.all_img[idx], self.all_mesh[idx], self.all_voxel[idx]
+        return {'img': self.all_img[idx],
+                'verts': self.all_mesh[idx].verts_packed(),
+                'faces': self.all_mesh[idx].faces_packed(), 
+                'voxel': self.all_voxel[idx]}
 
     def __len__(self):
         return len(self.all_path_prefix)
@@ -198,16 +202,25 @@ class ObjaverseDataset(Dataset):
 # Input:
 # Output: Dict
 def collate_batched(data):
-    img, mesh, vox = zip(*data)
+    '''
+    * Input: a list of dict,
+        each dict contains
+            'img': (C, H, W)
+            'verts': (N_v, 3)
+            'faces': (N_f, 3)
+            'voxel': (48, 48, 48)
+    '''
+    batched_images = torch.stack([d['img'] for d in data]).permute(0, 3, 1, 2)
+    batched_voxels = torch.stack([d['voxel'] for d in data])
 
-    batched_img_ten = torch.stack(img).permute(0,3,1,2)
-    batched_mesh_ten = pytorch3d.structures.join_meshes_as_batch(mesh)
-    batched_vox_ten = torch.stack(vox)
 
     out_dict = {
-        "img": batched_img_ten, 
-        "mesh": batched_mesh_ten,
-        "vox": batched_vox_ten
+        "img": batched_images, 
+        "mesh": Meshes(
+            verts=[d['verts'] for d in data],
+            faces=[d['faces'] for d in data]
+        ),
+        "vox": batched_voxels
     }
 
     return out_dict
@@ -215,18 +228,22 @@ def collate_batched(data):
 
 
 
-def get_dataloader(cfg):
+def get_dataloader(cfg, args):
     
     dataset = ObjaverseDataset(cfg)
-    dataloader = DataLoader(
-        dataset,
+
+    # initialize the DistributedSampler
+    sampler = DistributedSampler(dataset, num_replicas=args.world_size, rank=args.local_rank, shuffle=cfg.train, drop_last=False)
+
+    # initialize the dataloader
+    loader = DataLoader(
+        dataset=dataset,
+        sampler=sampler,
         batch_size=cfg.batch_size,
-        shuffle=cfg.train,
-        num_workers=cfg.num_worker,
+        shuffle=False,
         collate_fn=collate_batched
     )
-
-    return dataset, dataloader
+    return dataset, loader
 
 
 

@@ -48,11 +48,9 @@ bash environment_setup.sh
 ```
 
 ### Training
+Remember to modify the --config_name if needed.
 ``` bash
-python main.py \
-  --data_root [/path/to/Objaverse/Root] \
-  --split_data_path [/path/to/Objaverse/Split/Json] \
-  --train True
+bash tools/train.sh
 ```
 
 ## Citations

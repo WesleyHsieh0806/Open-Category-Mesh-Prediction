@@ -4,39 +4,53 @@ import numpy as np
 import os
 import logging
 import sys 
+from argparse import ArgumentParser
 
 from omegaconf import DictConfig, OmegaConf
 import hydra
 
 import torch
 
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data import DataLoader, Dataset
+import torch.distributed as dist
 
 from models import MeshRCNN
 from dataset.dataset import get_dataloader
 from losses import calculate_loss
 from logger import setup_logger
 
-from detectron2.engine.defaults import create_ddp_model
-from detectron2.engine import (
-    launch,
-)
-
 # os.environ["CUDA_VISIBLE_DEVICES"] = "3,4,5,6"
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
 
 
-def train_model(cfg, train_loader):
+def train_model(cfg, args):
     # setup logger
-    logger = setup_logger("train", cfg)
+    logger = setup_logger("train", cfg, args)
 
+
+    ###
+    # Setup DDP Dataloader
+    ###
+    dataset, loader = get_dataloader(cfg.dataloader, args)
+    train_loader = iter(loader)
+
+    ###
+    # setup DDP Model
+    ###
 
     model = MeshRCNN(cfg)
+    model.to(args.device)
 
-    model.to(cfg.training.device)
-
-    # DDP
-    model = create_ddp_model(model, **cfg.train.ddp)
+    # initialize distributed data parallel (DDP)
+    model = DDP(
+        model,
+        device_ids=[args.local_rank],
+        output_device=args.local_rank,
+        find_unused_parameters=True
+    )
 
     model.train()
 
@@ -79,9 +93,9 @@ def train_model(cfg, train_loader):
         images_gt, mesh_gt, voxel_gt = feed_dict["img"], feed_dict["mesh"], feed_dict["vox"]
         read_time = time.time() - read_start_time
 
-        images_gt = images_gt.to(cfg.training.device)
-        mesh_gt = mesh_gt.to(cfg.training.device)
-        voxel_gt = voxel_gt.to(cfg.training.device)
+        images_gt = images_gt.to(args.device)
+        mesh_gt = mesh_gt.to(args.device)
+        voxel_gt = voxel_gt.to(args.device)
 
         pred_voxel, refined_mesh = model(images_gt)
 
@@ -125,23 +139,40 @@ def train_model(cfg, train_loader):
     plt.plot(np.arange(cfg.training.max_iter), losses, marker='o')
     plt.savefig(os.path.join(cfg.training.log_dir, 'train_loss_baseline.png'))
 
+
+SEED = 42
+def get_ddp_args():
+    # args is used to recieve parameters for ddp training
+    parser = ArgumentParser('DDP usage example')
+    args = parser.parse_args()
+    args.local_rank = int(os.environ["LOCAL_RANK"])
+    args.world_size = int(os.environ["LOCAL_WORLD_SIZE"])
+
+    # keep track of whether the current process is the `master` process (totally optional, but I find it useful for data laoding, logging, etc.)
+    args.is_master = args.local_rank == 0
+
+    # set the device
+    args.device = "cuda:" + str(args.local_rank)
+    return args
+
 @hydra.main(version_base=None, config_path="../configs", config_name="baseline")
 def main(cfg: DictConfig):
-    port = 2**15 + 2**14 + hash(os.getuid() if sys.platform != "win32" else 1) % 2**14
-    dist_url = "tcp://127.0.0.1:{}".format(port)
+    # args is used to recieve parameters for ddp training
+    args = get_ddp_args()
+    
+    # initialize PyTorch distributed using environment variables (you could also do this more explicitly by specifying `rank` and `world_size`, but I find using environment variables makes it so that you can easily use the same script on different machines)
+    dist.init_process_group(backend='nccl', init_method='env://')
+    torch.cuda.set_device(args.local_rank)
 
-    # create dataset
-    obj_dataset, loader = get_dataloader(cfg.dataloader) 
-    train_loader = iter(loader)
+    # set the seed for all GPUs (also make sure to set the seed for random, numpy, etc.)
+    torch.cuda.manual_seed_all(SEED)
 
-    launch(
-        train_model,
-        cfg.ddp.num_gpus,
-        num_machines=cfg.ddp.num_machines,
-        machine_rank=cfg.ddp.machine_rank,
-        dist_url=dist_url,
-        args=(cfg, train_loader),
-    )
+
+    
+    
+    
+    train_model(cfg, args)
+
 
 if __name__ == '__main__':
     main()

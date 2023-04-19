@@ -29,6 +29,3 @@ pip install open3d==0.17.0
 
 pip install trimesh
 pip install joblib
-
-# download detectron2 for DDP
-python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
