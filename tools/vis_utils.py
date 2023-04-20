@@ -129,28 +129,27 @@ def load_cow_mesh(path="data/cow_mesh.obj"):
     faces = faces.verts_idx
     return vertices, faces
 
-def render_mesh(predicted_mesh, save_path, args):
-    color = torch.tensor([1.0, 0.0, 0.0], device=args.device)
+def render_mesh(predicted_mesh, save_path, device):
+    color = torch.tensor([1.0, 0.0, 0.0], device=device)
 
     # obtain the textures
     vertex_src = predicted_mesh.verts_packed().reshape([len(predicted_mesh), -1, 3])  # (b, n_points, 3)
-    textures = torch.ones(vertex_src.shape, device=args.device) * color
+    textures = torch.ones(vertex_src.shape, device=device) * color
 
     textures = pytorch3d.renderer.TexturesVertex(textures)
     predicted_mesh.textures = textures
 
     # render
-    render_360_mesh(predicted_mesh, save_path, dist=3.0)
+    render_360_mesh(predicted_mesh, save_path, device, dist=3.0)
 
 
-def render_360_mesh(meshes, save_path, nof_angle=50, image_size=256, dist=2.0):
+def render_360_mesh(meshes, save_path, device, nof_angle=30, image_size=256, dist=2.0):
     '''
     * Input:
         meshes: a single match
     '''
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    device = get_device()
     meshes = meshes.to(device)
     lights = pytorch3d.renderer.PointLights(
         location=[[0, 0.0, -4.0]], device=device,)
@@ -183,6 +182,22 @@ def render_360_mesh(meshes, save_path, nof_angle=50, image_size=256, dist=2.0):
     torus_images = [(rend[i]*255).astype(np.uint8)
                     for i in range(rend.shape[0])]
     imageio.mimsave(save_path, torus_images, fps=25)
+
+def render_point(predicted_point_cloud, save_path, device):
+    '''
+    * Predicted Point CLoud: (1, n, 3)
+    '''
+    # render 360 predicted voxel
+    color = [1.0, 0.0, 0.0]
+    color = torch.tensor([color], device=device)
+    predicted_point_cloud = predicted_point_cloud.to(device)
+    rgb_src = torch.ones(predicted_point_cloud.shape, device=device) * color
+    
+    point_cloud_src = pytorch3d.structures.Pointclouds(
+        points=predicted_point_cloud.detach(), features=rgb_src
+    )
+    render_360_point_cloud(point_cloud_src, save_path, dist=1.5, image_size = 512, nof_angle=50, device=device)
+    
 
 def render_360_point_cloud(point_cloud, save_path, dist=3.0, image_size = 256, nof_angle=50, device=None):
     if device is None:

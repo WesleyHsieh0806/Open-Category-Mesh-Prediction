@@ -22,12 +22,13 @@ import torch.distributed as dist
 from torchvision.models.feature_extraction import create_feature_extractor
 from torchvision.models.feature_extraction import get_graph_node_names
 from sklearn.manifold import TSNE
-
+from pytorch3d.ops import sample_points_from_meshes
 
 from models import MeshRCNN
 from dataset.dataset import get_dataloader
 from losses import calculate_loss
-from vis_utils import render_mesh
+from vis_utils import render_mesh, render_point
+
 
 def get_tsne(feats):
     tsne = TSNE(n_components=2, perplexity=min(30, len(feats) - 1))
@@ -106,14 +107,20 @@ def tsne_visualization(cfg):
 
 
         # plot the 3D mesh for this object
-        render_mesh(refined_mesh[-1], os.path.join(cfg.vis_output_dir, "Seen",
-                                                        path_prefix.split("/")[5], 
-                                                        path_prefix.split("/")[6], 'Refined_Mesh_{}.gif'.format(cfg.roi_head.ROI_MESH_HEAD.NUM_STAGES)), 
-                                                        cfg)
-        render_mesh(mesh_gt, os.path.join(cfg.vis_output_dir, "Seen",
-                                                        path_prefix.split("/")[5], 
-                                                        path_prefix.split("/")[6], 'GT_Mesh.gif'), 
-                                                        cfg)
+        # pointclouds_tgt = sample_points_from_meshes(mesh_gt, cfg.n_points) 
+        # pointclouds_refined = sample_points_from_meshes(refined_mesh[-1], cfg.n_points) 
+        with torch.no_grad():
+            try:
+                render_mesh(refined_mesh[-1], os.path.join(cfg.vis_output_dir, "Seen",
+                                                            path_prefix.split("/")[5], 
+                                                            path_prefix.split("/")[6], 'Refined_Mesh_{}.gif'.format(cfg.roi_head.ROI_MESH_HEAD.NUM_STAGES)), 
+                                                            cfg.render_device)
+                render_mesh(mesh_gt, os.path.join(cfg.vis_output_dir, "Seen",
+                                                            path_prefix.split("/")[5], 
+                                                            path_prefix.split("/")[6], 'GT_Mesh.gif'), 
+                                                            cfg.render_device)
+            except:
+                print("Fail to Render {}".format(path_prefix))
     seen_features = np.concatenate(seen_features, axis=0)
 
     # Obtain features for Unseen categories
@@ -136,23 +143,27 @@ def tsne_visualization(cfg):
         unseen_features.append(intermediate_feature.flatten(1).detach().cpu().numpy())
         
         # plot mesh
-        render_mesh(refined_mesh[-1], os.path.join(cfg.vis_output_dir, "Unseen",
-                                                        path_prefix.split("/")[5], 
-                                                        path_prefix.split("/")[6], 'Refined_Mesh_{}.gif'.format(cfg.roi_head.ROI_MESH_HEAD.NUM_STAGES)), 
-                                                        cfg)
-        render_mesh(mesh_gt, os.path.join(cfg.vis_output_dir, "Unseen",
-                                                        path_prefix.split("/")[5], 
-                                                        path_prefix.split("/")[6], 'GT_Mesh.gif'), 
-                                                        cfg)
+        with torch.no_grad():
+            try:
+                render_mesh(refined_mesh[-1], os.path.join(cfg.vis_output_dir, "Unseen",
+                                                            path_prefix.split("/")[5], 
+                                                            path_prefix.split("/")[6], 'Refined_Mesh_{}.gif'.format(cfg.roi_head.ROI_MESH_HEAD.NUM_STAGES)), 
+                                                            cfg.render_device)
+                render_mesh(mesh_gt, os.path.join(cfg.vis_output_dir, "Unseen",
+                                                            path_prefix.split("/")[5], 
+                                                            path_prefix.split("/")[6], 'GT_Mesh.gif'), 
+                                                        cfg.render_device)
+            except:
+                print("Fail to Render {}".format(path_prefix))
     unseen_features = np.concatenate(unseen_features, axis=0)
 
-    # Plot tsne for seen vs unseen
-    projected_features = get_tsne(np.concatenate([seen_features, unseen_features], axis=0))
-    seen_unseen_labels = np.array(["Seen"] * len(seen_features) + ['Unseen'] * len(unseen_features))
-    plot_tsne(projected_features, seen_unseen_labels, "Seen vs Unseen TSNE", os.path.join(cfg.output_dir, 'Seen_UnSeen_TSNE.png'))
+    # # Plot tsne for seen vs unseen
+    # projected_features = get_tsne(np.concatenate([seen_features, unseen_features], axis=0))
+    # seen_unseen_labels = np.array(["Seen"] * len(seen_features) + ['Unseen'] * len(unseen_features))
+    # plot_tsne(projected_features, seen_unseen_labels, "Seen vs Unseen TSNE", os.path.join(cfg.output_dir, 'Seen_UnSeen_TSNE.png'))
 
-    # plot tsne for all labels
-    categories = np.array(seen_labels + unseen_labels)
+    # # plot tsne for all labels
+    # categories = np.array(seen_labels + unseen_labels)
     # plot_tsne(projected_features, categories, "All Categories TSNE", os.path.join(cfg.output_dir, 'All_Category_TSNE.png'))
     # plot_tsne(projected_features, categories, "All Categories TSNE", os.path.join(cfg.output_dir, 'All_Category_WO_Legend_TSNE.png'), legend=False)
 
