@@ -23,6 +23,9 @@ conda install pytorch3d -c pytorch3d
 # install hydra to read configuration
 pip install hydra-core --upgrade
 
+# tsne visualization
+pip install scikit-learn
+
 
 # install open3d
 pip install open3d==0.17.0

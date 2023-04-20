@@ -71,7 +71,7 @@ class MeshRCNN(nn.Module):
         # ), f"{self.pixel_mean} and {self.pixel_std} have different shapes!"
 
 
-    def forward(self, images: torch.Tensor):
+    def forward(self, images: torch.Tensor, intermediate_feature=False):
         """
         Input:
             images: tensor of shape (B, C, H, W)
@@ -81,7 +81,7 @@ class MeshRCNN(nn.Module):
                 A list containing Mesh objects from three refinement stages
         """
         if not self.training:
-            return self.inference(images)
+            return self.inference(images, intermediate_feature)
 
         # Extract image features
         # keys: '0', '1', '2', '3'
@@ -93,9 +93,12 @@ class MeshRCNN(nn.Module):
 
         # obtain voxel, mesh prediction
         pred_voxel, refined_mesh = self.roi_head(feature_dict)
+
+        if intermediate_feature:
+            return pred_voxel, refined_mesh, feature_dict
         return pred_voxel, refined_mesh
 
-    def inference(self, images):
+    def inference(self, images, intermediate_feature=False):
         """
         Input:
             images: tensor of shape (B, C, H, W)
@@ -114,6 +117,9 @@ class MeshRCNN(nn.Module):
 
         # obtain voxel, mesh prediction
         pred_voxel, refined_mesh = self.roi_head(feature_dict)
+
+        if intermediate_feature:
+            return pred_voxel, refined_mesh, feature_dict
         return pred_voxel, refined_mesh
 
 @hydra.main(version_base=None, config_path="../configs", config_name="baseline")

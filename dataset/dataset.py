@@ -194,7 +194,10 @@ class ObjaverseDataset(Dataset):
                 'verts': self.all_mesh[idx].verts_packed(),
                 'faces': self.all_mesh[idx].faces_packed(), 
                 'voxel': self.all_voxel[idx]}
-
+    
+    def get_path_prefix(self, idx):
+        return self.all_path_prefix[idx]
+        
     def __len__(self):
         return len(self.all_path_prefix)
 
@@ -228,9 +231,17 @@ def collate_batched(data):
 
 
 
-def get_dataloader(cfg, args):
+def get_dataloader(cfg, args=None):
     
     dataset = ObjaverseDataset(cfg)
+
+    if args is None:
+        return dataset, DataLoader(
+                    dataset=dataset,
+                    batch_size=cfg.batch_size,
+                    shuffle=False,
+                    collate_fn=collate_batched
+                    )
 
     # initialize the DistributedSampler
     sampler = DistributedSampler(dataset, num_replicas=args.world_size, rank=args.local_rank, shuffle=cfg.train, drop_last=False)

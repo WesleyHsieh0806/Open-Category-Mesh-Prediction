@@ -1,0 +1,52 @@
+dataloader_seen:
+  data_root: /ssd1/chengyeh/Objaverse
+  num_worker: 8
+  split_data_path: /ssd1/chengyeh/Objaverse/valid_seen_uid.json
+  batch_size: 1
+  train: False
+
+dataloader_unseen:
+  data_root: /ssd1/chengyeh/Objaverse
+  num_worker: 8
+  split_data_path: /ssd1/chengyeh/Objaverse/valid_unseen_uid.json
+  batch_size: 1
+  train: False
+
+backbone:
+  type: resnet50
+  pretrained: True
+
+bilinear_interpolation:
+  output_size: [24, 24]
+
+roi_head:
+  type: MeshRCNNROIHeads
+  NUM_CLASSES: None
+  ROI_VOXEL_HEAD:
+    input_shape: [2048, 24, 24]
+    CUBIFY_THRESH: 0.2
+    VOXEL_LOSS_WEIGHT: 1.0
+    NUM_CONV: 4
+    CONV_DIM: 256
+    VOXEL_SIZE: 48
+    CLASS_AGNOSTIC: True
+
+  ROI_MESH_HEAD:
+    NAME: "MeshRCNNGraphConvHead"
+    INPUT_CHANNELS: [256, 512, 1024, 2048]
+    NUM_STAGES: 2
+    NUM_RES_GRAPH_CONVS: 2
+    GRAPH_CONV_DIM: 128
+    GRAPH_CONV_INIT: "normal"
+    GT_NUM_SAMPLES: 5000
+    PRED_NUM_SAMPLES: 5000
+    CHAMFER_LOSS_WEIGHT: 1.0
+    NORMALS_LOSS_WEIGHT: 0.0
+    EDGE_LOSS_WEIGHT: 0.2
+    GT_COORD_THRESH: 5.0
+
+checkpoint_path: /ssd1/chengyeh/Open-Category-Experiment/Baseline/baseline_10000
+device: cuda:0
+output_dir: /ssd1/chengyeh/Open-Category-Experiment/Baseline/
+vis_output_dir: /ssd1/chengyeh/Open-Category-Visualization/Baseline/val
+

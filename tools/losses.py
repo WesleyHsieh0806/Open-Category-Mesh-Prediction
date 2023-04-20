@@ -32,7 +32,7 @@ def calculate_loss(images_gt, mesh_gt, voxel_gt, pred_voxel, refined_mesh, cfg):
 
 			c_loss, n_loss = chamfer_distance(sample_pred, sample_trg, 
 					x_normals=sample_pred_normals, y_normals=sample_trg_normals,
-					batch_reduction="mean", point_reduction="sum")
+					batch_reduction="mean", point_reduction="mean")
 
 			e_loss = mesh_edge_loss(mesh_pred)
 
